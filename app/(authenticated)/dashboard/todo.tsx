@@ -4,7 +4,8 @@ import { useTransition } from "react";
 import { InferSelectModel } from "drizzle-orm";
 
 import * as schema from "@/db/schema";
-import { removeTodo, toggleTodo, type Priority } from "./actions";
+import { removeTodo, toggleTodo } from "./actions";
+import type { Priority } from "@/app/types";
 
 type Todo = InferSelectModel<typeof schema.todos>;
 type Project = InferSelectModel<typeof schema.projects>;

@@ -5,7 +5,8 @@ import { useFormStatus } from "react-dom";
 import { InferSelectModel } from "drizzle-orm";
 import * as schema from "@/db/schema";
 
-import { addTodo, type Priority } from "./actions";
+import { addTodo } from "./actions";
+import type { Priority } from "@/app/types";
 
 type Project = InferSelectModel<typeof schema.projects>;
 

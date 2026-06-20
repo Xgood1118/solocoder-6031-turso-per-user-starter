@@ -6,7 +6,8 @@ import { InferSelectModel } from "drizzle-orm";
 import * as schema from "@/db/schema";
 import { Todo } from "./todo";
 import { Form } from "./form";
-import { addTodo, removeTodo, toggleTodo, type Priority } from "./actions";
+import { addTodo, removeTodo, toggleTodo } from "./actions";
+import type { Priority } from "@/app/types";
 
 type TodoType = InferSelectModel<typeof schema.todos>;
 type Project = InferSelectModel<typeof schema.projects>;
@@ -49,12 +50,9 @@ function sortTodos(
     });
   } else if (sortBy === "createdAt") {
     sorted.sort((a, b) => {
-      if (!a.createdAt && !b.createdAt) return 0;
-      if (!a.createdAt) return 1;
-      if (!b.createdAt) return -1;
-      return (
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
     });
   }
 
@@ -70,8 +68,6 @@ function filterTodos(
 
   if (projectId !== null) {
     filtered = filtered.filter((t) => t.projectId === projectId);
-  } else {
-    filtered = filtered.filter((t) => t.projectId === null);
   }
 
   const today = new Date().toISOString().split("T")[0];
@@ -173,19 +169,25 @@ export function TodoList({
   const currentProject =
     selectedProjectId !== null
       ? getProjectById(selectedProjectId)
-      : { name: "未分组", emoji: "📋" };
+      : null;
 
-  const today = new Date().toISOString().split("T")[0];
   const overdueHighlight = sortBy === "dueDate";
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          {currentProject && (
-            <span className="text-2xl">{currentProject.emoji}</span>
+          {currentProject ? (
+            <>
+              <span className="text-2xl">{currentProject.emoji}</span>
+              <span>{currentProject.name}</span>
+            </>
+          ) : (
+            <>
+              <span className="text-2xl">📋</span>
+              <span>全部任务</span>
+            </>
           )}
-          {currentProject?.name || "未分组"}
         </h2>
         <div className="flex items-center gap-2">
           <select

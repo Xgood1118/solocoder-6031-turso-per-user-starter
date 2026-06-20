@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { setupDatabase, type Region } from "./actions";
-import { type TemplateType } from "../utils";
+import { type TemplateType } from "@/app/types";
 
 const STORAGE_KEY = "onboarding_state";
 
@@ -73,7 +73,7 @@ export function Onboarding() {
   const goToPrevStep = useCallback(() => {
     const prevStep = Math.max(state.step - 1, 1);
     updateState({ step: prevStep });
-  }, [updateState]);
+  }, [state.step, updateState]);
 
   const selectRegion = useCallback(
     (region: Region) => {

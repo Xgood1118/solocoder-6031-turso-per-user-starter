@@ -12,9 +12,12 @@ export default async function Layout({
 
   if (!databaseExists) redirect("/welcome");
 
-  const todosTableExists = await checkTableExists("todos");
-
-  if (!todosTableExists) redirect("/welcome");
+  try {
+    const todosTableExists = await checkTableExists("todos");
+    if (!todosTableExists) redirect("/welcome");
+  } catch {
+    redirect("/welcome");
+  }
 
   return (
     <>

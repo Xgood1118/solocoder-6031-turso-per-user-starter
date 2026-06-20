@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import * as schema from "@/db/schema";
 import { getDatabaseClient } from "@/app/utils";
 import { eq, sql, and, count, gte, lte, isNull } from "drizzle-orm";
+import type { Priority } from "@/app/types";
 
-export type Priority = "low" | "medium" | "high";
+export type { Priority };
 
 export type TodoItem = {
   id: number;

@@ -4,8 +4,10 @@ import { createClient as createTursoClient } from "@tursodatabase/api";
 import md5 from "md5";
 import { redirect } from "next/navigation";
 import { drizzle } from "drizzle-orm/libsql";
+import { sql } from "drizzle-orm";
 
 import * as schema from "@/db/schema";
+import type { TemplateType } from "./types";
 
 const turso = createTursoClient({
   token: process.env.TURSO_API_TOKEN!,
@@ -99,11 +101,10 @@ export async function checkTableExists(tableName: string): Promise<boolean> {
   if (!client) return false;
 
   try {
-    const result = await client.execute({
-      sql: "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-      args: [tableName],
-    });
-    return result.rows.length > 0;
+    const result = await client.all(
+      sql`SELECT name FROM sqlite_master WHERE type='table' AND name=${tableName}`,
+    );
+    return result.length > 0;
   } catch (error) {
     console.error("Error checking table existence:", error);
     return false;
@@ -116,22 +117,22 @@ export async function runMigrations(): Promise<boolean> {
 
   try {
     const migrations = [
-      `CREATE TABLE IF NOT EXISTS "projects" (
+      sql`CREATE TABLE IF NOT EXISTS "projects" (
         "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
         "name" text NOT NULL,
         "description" text,
         "emoji" text NOT NULL DEFAULT '📁',
         "created_at" integer NOT NULL DEFAULT (unixepoch())
       )`,
-      `ALTER TABLE "todos" ADD "project_id" integer`,
-      `ALTER TABLE "todos" ADD "priority" text NOT NULL DEFAULT 'medium'`,
-      `ALTER TABLE "todos" ADD "due_date" text`,
-      `ALTER TABLE "todos" ADD "created_at" integer NOT NULL DEFAULT (unixepoch())`,
+      sql`ALTER TABLE "todos" ADD "project_id" integer`,
+      sql`ALTER TABLE "todos" ADD "priority" text NOT NULL DEFAULT 'medium'`,
+      sql`ALTER TABLE "todos" ADD "due_date" text`,
+      sql`ALTER TABLE "todos" ADD "created_at" integer NOT NULL DEFAULT (unixepoch())`,
     ];
 
     for (const migration of migrations) {
       try {
-        await client.execute(migration);
+        await client.run(migration);
       } catch (e) {
         if (
           !(e as Error).message.includes("duplicate column") &&
@@ -149,7 +150,7 @@ export async function runMigrations(): Promise<boolean> {
   }
 }
 
-export type TemplateType = "blank" | "work" | "study";
+export type { TemplateType };
 
 export async function seedTemplateData(
   template: TemplateType,
@@ -197,26 +198,27 @@ export async function seedTemplateData(
       ];
     }
 
-    let projectId: number | null = null;
+    let firstProjectId: number | null = null;
     for (const project of data.projects) {
-      const result = await client.execute({
-        sql: "INSERT INTO projects (name, description, emoji) VALUES (?, ?, ?) RETURNING id",
-        args: [project.name, project.description, project.emoji],
-      });
-      if (result.rows.length > 0 && !projectId) {
-        projectId = result.rows[0].id as number;
+      const result = await client
+        .insert(schema.projects)
+        .values({
+          name: project.name,
+          description: project.description,
+          emoji: project.emoji,
+        })
+        .returning();
+      if (result.length > 0 && !firstProjectId) {
+        firstProjectId = result[0].id;
       }
     }
 
     for (const todo of data.todos) {
-      await client.execute({
-        sql: "INSERT INTO todos (description, priority, project_id, due_date) VALUES (?, ?, ?, ?)",
-        args: [
-          todo.description,
-          todo.priority || "medium",
-          projectId,
-          todo.dueDate || null,
-        ],
+      await client.insert(schema.todos).values({
+        description: todo.description,
+        priority: (todo.priority as "low" | "medium" | "high") || "medium",
+        projectId: firstProjectId,
+        dueDate: todo.dueDate || null,
       });
     }
 

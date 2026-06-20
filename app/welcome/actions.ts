@@ -6,10 +6,10 @@ import {
   runMigrations,
   seedTemplateData,
   checkTableExists,
-  type TemplateType,
 } from "../utils";
+import type { TemplateType, Region } from "../types";
 
-export type Region = "us" | "eu";
+export type { Region };
 
 export async function setupDatabase(
   region: Region,
