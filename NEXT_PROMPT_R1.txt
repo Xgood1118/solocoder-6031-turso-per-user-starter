@@ -1,0 +1,1 @@
+项目直接编译不通过，两个地方有冲突。一是在 /welcome 路径下同时放了 page.tsx（渲染 onboarding 页面）和 route.tsx（做重定向判断），Next.js 不认两个文件解析到同一条路径。二是 todos.tsx 是个客户端组件但引用了服务端才能用的 Clerk auth 方法，webpack 编译直接报 server-only 导入错误。这两个问题导致项目 build 和 dev 完全跑不起来，连首页都看不到，新增的 Projects 实体、优先级和截止日期、onboarding 三步引导这些功能代码写了但一块都走不通。检查修复一下。
