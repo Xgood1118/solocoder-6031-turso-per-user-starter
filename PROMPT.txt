@@ -2,4 +2,4 @@
 
 在 Todo 模型上扩展优先级和截止日期：priority 取值 low 或者 medium 或者 high（默认 medium），due_date 允许 null 也允许 ISO 字符串。前端 Todo 行左侧显示优先级色块，low 灰、medium 黄、high 红，按 due_date 升序排列时已过期且未完成的 Todo 飘红并置顶。Dashboard 顶部新增一个"今日到期"小卡片，统计 due_date 是今天且 completed 是 false 的 Todo 数量，点击跳到过滤后的列表。
 
-在 Welcome 页面下新增 onboarding 引导流程：新用户首次进入时检测该用户的数据库是否已就绪（表 todos 是否存在），如果还没有就展示三步引导——选数据库区域（US 或者 EU 二选一）、选初始示例 Todo 模板（空白、工作、学习三选一）、最后确认创建并执行 migrations 脚本。引导过程每一步骤都有上一步和下一步按钮，步骤之间用进度条连起来，刷新页面后引导状态写入 localStorage 可以续上。检查修复一下。
+在 Welcome 页面下新增 onboarding 引导流程：新用户首次进入时检测该用户的数据库是否已就绪（表 todos 是否存在），如果还没有就展示三步引导——选数据库区域（US 或者 EU 二选一）、选初始示例 Todo 模板（空白、工作、学习三选一）、最后确认创建并执行 migrations 脚本。引导过程每一步骤都有上一步和下一步按钮，步骤之间用进度条连起来，刷新页面后引导状态写入 localStorage 可以续上。

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { checkDatabaseExists } from "../utils";
+import { checkDatabaseExists, checkTableExists } from "../utils";
 import { Header } from "./header";
 
 export default async function Layout({
@@ -12,10 +12,14 @@ export default async function Layout({
 
   if (!databaseExists) redirect("/welcome");
 
+  const todosTableExists = await checkTableExists("todos");
+
+  if (!todosTableExists) redirect("/welcome");
+
   return (
     <>
       <Header />
-      <div className="max-w-2xl mx-auto px-6 py-12">{children}</div>
+      <div className="max-w-6xl mx-auto px-6 py-12">{children}</div>
     </>
   );
 }
